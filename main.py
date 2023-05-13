@@ -22,15 +22,40 @@ if __name__ == '__main__':
         tasks = yaml.load(file, Loader=yaml.FullLoader)['tasks']
 
 
-    def task_dependencies_finder(task_name):
+    def find_task_dependencies(task_name):
         for concrete_task in tasks:
             if concrete_task['name'] == task_name:
                 if not concrete_task['dependencies']:
                     list_of_needed_tasks.append(concrete_task['name'])
                 else:
                     for dependency_name in concrete_task['dependencies']:
-                        task_dependencies_finder(dependency_name)
+                        find_task_dependencies(dependency_name)
                     list_of_needed_tasks.append(concrete_task['name'])
+
+    def find_build():
+        build_exist = False
+        print("Build info:")
+        for build in builds:
+            if build['name'] == args['<name>']:
+                build_exist = True
+                print(f" name: {build['name']}")
+                for task in build['tasks']:
+                    find_task_dependencies(task)
+                print(" tasks:")
+                for task in list_of_needed_tasks:
+                    print(f"  {task}")
+        if not build_exist:
+            print(f"No such build, try 'python {sys.argv[0]} builds' to see list of available builds")
+
+    def find_task():
+        task_exist = False
+        print("Task info:")
+        for task in tasks:
+            if task['name'] == args['<name>']:
+                task_exist = True
+                print(f" name: {task['name']}\n dependencies: {','.join(task['dependencies'])}")
+        if not task_exist:
+            print(f"No such task, try 'python {sys.argv[0]} tasks' to see list of available tasks")
 
 
     if args['tasks']:
@@ -43,26 +68,8 @@ if __name__ == '__main__':
             print(f" {build['name']}")
     if args['get']:
         if args['build']:
-            buildExist = False
-            print("Build info:")
-            for build in builds:
-                if build['name'] == args['<name>']:
-                    buildExist = True
-                    print(f" name: {build['name']}")
-                    for i in build['tasks']:
-                        task_dependencies_finder(i)
-                    print(" tasks:")
-                    for i in list_of_needed_tasks:
-                        print(f"  {i}")
-            if not buildExist:
-                print(f"No such build, try 'python {sys.argv[0]} builds' to see list of available builds")
+            find_build()
 
         if args['task']:
-            taskExist = False
-            print("Task info:")
-            for task in tasks:
-                if task['name'] == args['<name>']:
-                    taskExist = True
-                    print(f" name: {task['name']}\n dependencies: {','.join(task['dependencies'])}")
-            if not taskExist:
-                print(f"No such task, try 'python {sys.argv[0]} tasks' to see list of available tasks")
+            find_task()
+
