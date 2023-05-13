@@ -25,7 +25,7 @@ def find_build(builds):
             build_exist = True
             print(f" name: {build['name']}")
             for task_name in build['tasks']:
-                find_task_dependencies(tasks,task_name)
+                find_task_dependencies(tasks, task_name)
             print(" tasks:")
             for task in list_of_needed_tasks:
                 print(f"  {task}")
